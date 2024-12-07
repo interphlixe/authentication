@@ -6,5 +6,6 @@ edition = "2021"
 [dependencies]
 aws-sdk-config = { version = "1.53.0", features = ["behavior-version-latest"] }
 aws-sdk-dynamodb = "1.55.0"
+bson = "2.13.0"
 lambda_http = "0.13.0"
 tokio = { version = "1.42.0", features = ["full"] }
