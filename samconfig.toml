@@ -1,0 +1,12 @@
+version = 0.1
+
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "interphlix-authentication-stack"
+s3_bucket = "your-s3-bucket-name"
+s3_prefix = "interphlix-authentication"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = true
+resolve_s3 = true
