@@ -11,7 +11,7 @@ Resources:
   UsersTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: Users
+      TableName: interphlix-Users
       AttributeDefinitions:
         - AttributeName: id
           AttributeType: B  # Binary type for user ID
@@ -33,7 +33,7 @@ Resources:
   VerificationCodesTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: VerificationCodes
+      TableName: interphlix-VerificationCodes
       AttributeDefinitions:
         - AttributeName: code
           AttributeType: N  # Number type for code
@@ -51,7 +51,7 @@ Resources:
   RolesTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: Roles
+      TableName: interphlix-Roles
       AttributeDefinitions:
         - AttributeName: user_id
           AttributeType: B  # Binary type for user ID
