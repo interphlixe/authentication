@@ -1,72 +1,79 @@
+# Define the AWS CloudFormation template version
 AWSTemplateFormatVersion: '2010-09-09'
+# Specify the use of AWS SAM (Serverless Application Model) for easier serverless application deployment
 Transform: AWS::Serverless-2016-10-31
+# Description of the template
 Description: >
   SAM Template for Authentication Service
 
 Resources:
+  # Define a DynamoDB table for storing user information
   UsersTable:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: Users
       AttributeDefinitions:
         - AttributeName: id
-          AttributeType: B
+          AttributeType: B  # Binary type for user ID
         - AttributeName: email
-          AttributeType: S
+          AttributeType: S  # String type for email
       KeySchema:
         - AttributeName: id
-          KeyType: HASH
+          KeyType: HASH  # Primary key
       GlobalSecondaryIndexes:
         - IndexName: email-index
           KeySchema:
             - AttributeName: email
-              KeyType: HASH
+              KeyType: HASH  # Secondary index on email
           Projection:
-            ProjectionType: ALL
-      BillingMode: PAY_PER_REQUEST
+            ProjectionType: ALL  # Include all attributes in the index
+      BillingMode: PAY_PER_REQUEST  # On-demand billing
 
+  # Define a DynamoDB table for storing verification codes
   VerificationCodesTable:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: VerificationCodes
       AttributeDefinitions:
         - AttributeName: code
-          AttributeType: N
+          AttributeType: N  # Number type for code
         - AttributeName: expires
-          AttributeType: N
+          AttributeType: N  # Number type for expiration time
       KeySchema:
         - AttributeName: code
-          KeyType: HASH
+          KeyType: HASH  # Primary key
       TimeToLiveSpecification:
         AttributeName: expires
-        Enabled: true
-      BillingMode: PAY_PER_REQUEST
+        Enabled: true  # Enable TTL to automatically delete expired items
+      BillingMode: PAY_PER_REQUEST  # On-demand billing
 
+  # Define a DynamoDB table for storing user roles
   RolesTable:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: Roles
       AttributeDefinitions:
         - AttributeName: user_id
-          AttributeType: B
+          AttributeType: B  # Binary type for user ID
         - AttributeName: id
-          AttributeType: B
+          AttributeType: B  # Binary type for role ID
       KeySchema:
         - AttributeName: user_id
-          KeyType: HASH
+          KeyType: HASH  # Partition key
         - AttributeName: id
-          KeyType: RANGE
-      BillingMode: PAY_PER_REQUEST
+          KeyType: RANGE  # Sort key
+      BillingMode: PAY_PER_REQUEST  # On-demand billing
 
+  # Define an API Gateway for the authentication service
   InterphlixAuthenticationApi:
     Type: AWS::Serverless::Api
     Properties:
       Name: Interphlix-Authentication
-      StageName: Prod
+      StageName: Prod  # Deployment stage
       Cors:
-        AllowMethods: "'OPTIONS,GET,POST'"
-        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-        AllowOrigin: "'*'"
+        AllowMethods: "'OPTIONS,GET,POST'"  # Allowed HTTP methods
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"  # Allowed headers
+        AllowOrigin: "'*'"  # Allow all origins
       DefinitionBody:
         openapi: 3.0.1
         info:
@@ -78,7 +85,7 @@ Resources:
               x-amazon-apigateway-integration:
                 uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${InterphlixAuthenticationFunction.Arn}/invocations
                 httpMethod: POST
-                type: aws_proxy
+                type: aws_proxy  # Use Lambda proxy integration
           /login:
             post:
               x-amazon-apigateway-integration:
@@ -116,33 +123,35 @@ Resources:
                 httpMethod: GET
                 type: aws_proxy
 
+  # Define a Lambda function for handling authentication logic
   InterphlixAuthenticationFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: interphlix-authentication
-      Handler: bootstrap
-      Runtime: provided.al2
+      Handler: bootstrap  # Entry point for the Lambda function
+      Runtime: provided.al2  # Custom runtime for Lambda
       Architectures:
-        - x86_64
-      MemorySize: 512
-      Timeout: 30
+        - x86_64  # Architecture type
+      MemorySize: 512  # Memory allocation for the function
+      Timeout: 30  # Maximum execution time in seconds
       Policies:
-        - AWSLambdaBasicExecutionRole
+        - AWSLambdaBasicExecutionRole  # Basic execution role for Lambda
         - DynamoDBCrudPolicy:
-            TableName: Users
+            TableName: Users  # CRUD permissions for Users table
         - DynamoDBCrudPolicy:
-            TableName: VerificationCodes
+            TableName: VerificationCodes  # CRUD permissions for VerificationCodes table
         - DynamoDBCrudPolicy:
-            TableName: Roles
+            TableName: Roles  # CRUD permissions for Roles table
       Events:
         ApiEvent:
           Type: Api
           Properties:
-            RestApiId: !Ref InterphlixAuthenticationApi
+            RestApiId: !Ref InterphlixAuthenticationApi  # Link to the API Gateway
             Path: /
-            Method: ANY
+            Method: ANY  # Allow all HTTP methods
 
 Outputs:
+  # Output the API Gateway URL for the Prod stage
   ApiUrl:
     Description: "API Gateway endpoint URL for Prod stage"
     Value: !Sub "https://${InterphlixAuthenticationApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
