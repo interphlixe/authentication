@@ -128,7 +128,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: interphlix-authentication
-      CodeUri: ./target/lambda/release/  # Location of the compiled and zipped Lambda function
+      CodeUri: ./target/lambda/authentication/bootstrap.zip  # Location of the compiled and zipped Lambda function
       Handler: bootstrap  # Entry point for the Lambda function
       Runtime: provided.al2  # Custom runtime for Lambda
       Architectures:
