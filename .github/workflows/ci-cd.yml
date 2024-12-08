@@ -23,10 +23,20 @@ jobs:
       run: |
         cargo test
 
-    - name: Install Zig toolchain
+    - name: Cache Zig toolchain
+      uses: actions/cache@v3
+      with:
+        path: /snap/zig
+        key: ${{ runner.os }}-zig
+
+    - name: Install snapd
       run: |
         sudo apt-get update
-        sudo apt-get install -y zig
+        sudo apt-get install -y snapd
+
+    - name: Install Zig toolchain
+      run: |
+        sudo snap install zig --beta --classic
 
     - name: Install Cargo Lambda
       uses: jaxxstorm/action-install-gh-release@v1.9.0
