@@ -28,10 +28,10 @@ jobs:
         # Note: make sure you are using a recent version of zig (the one below isn't kept in sync with new releases)
         zig-version: 'stable'
 
-      - name: Install Cargo Lambda
-        uses: jaxxstorm/action-install-gh-release@v1.9.0
-        with:
-          repo: cargo-lambda/cargo-lambda
+    - name: Install Cargo Lambda
+      uses: jaxxstorm/action-install-gh-release@v1.9.0
+      with:
+        repo: cargo-lambda/cargo-lambda
 
     - name: compile the code
       run: |
