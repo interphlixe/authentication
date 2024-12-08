@@ -9,4 +9,3 @@ s3_prefix = "interphlix-authentication"
 region = "us-east-1"
 capabilities = "CAPABILITY_IAM"
 confirm_changeset = true
-resolve_s3 = true

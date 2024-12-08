@@ -83,15 +83,6 @@ jobs:
       run: |
         cargo lambda build --output-format zip
 
-    - name: Verify build output
-      run: |
-        ls -R target/lambda/authentication || echo "Directory not found"
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: lambda-artifacts
-        path: target/lambda/authentication
-
     - name: Package SAM application
       run: |
         sam package --template-file template.yaml --s3-bucket interphlix-auth-code --output-template-file packaged.yaml --region us-east-1
