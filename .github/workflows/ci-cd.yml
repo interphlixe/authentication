@@ -43,6 +43,10 @@ jobs:
         cargo test
 
 
+    - name: Install Zig toolchain
+      run: |
+        sudo snap install zig --beta --classic
+
     - name: Cache Zig toolchain
       uses: actions/cache@v3
       with:
