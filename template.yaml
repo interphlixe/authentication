@@ -141,17 +141,18 @@ Resources:
             TableName: VerificationCodes  # CRUD permissions for VerificationCodes table
         - DynamoDBCrudPolicy:
             TableName: Roles  # CRUD permissions for Roles table
+    Events:
+      ApiEvent:
+        Type: Api
+        Properties:
+          RestApiId: !Ref InterphlixAuthenticationApi  # Link to the API Gateway
+          Path: /
+          Method: ANY  # Allow all HTTP methods
     Environment:
       Variables:
         USERS_TABLE_NAME: !Ref UsersTable
         VERIFICATION_CODES_TABLE_NAME: !Ref VerificationCodesTable
         # ROLES_TABLE_NAME: !Ref RolesTable
-        ApiEvent:
-          Type: Api
-          Properties:
-            RestApiId: !Ref InterphlixAuthenticationApi  # Link to the API Gateway
-            Path: /
-            Method: ANY  # Allow all HTTP methods
 
 Outputs:
   # Output the API Gateway URL for the Prod stage
