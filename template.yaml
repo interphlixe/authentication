@@ -37,8 +37,6 @@ Resources:
       AttributeDefinitions:
         - AttributeName: code
           AttributeType: N  # Number type for code
-        - AttributeName: expires
-          AttributeType: N  # Number type for expiration time
       KeySchema:
         - AttributeName: code
           KeyType: HASH  # Primary key
