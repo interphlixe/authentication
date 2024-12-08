@@ -35,7 +35,7 @@ jobs:
 
     - name: compile the code
       run: |
-        cargo lambda build --release
+        cargo lambda build --output-format zip
 
   deploy:
     runs-on: ubuntu-latest
