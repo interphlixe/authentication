@@ -107,9 +107,8 @@ jobs:
 
     - name: Package SAM application
       run: |
-        ls -a
-#        sam package --template-file template.yaml --s3-bucket interphlix-auth-code --output-template-file packaged.yaml --region us-east-1
+        sam package --template-file template.yaml --s3-bucket interphlix-auth-code --output-template-file packaged.yaml --region us-east-1
 
-    # - name: Deploy SAM application
-    #   run: |
-    #     sam deploy --template-file packaged.yaml --stack-name interphlix-authentication --capabilities CAPABILITY_IAM --region us-east-1
+    - name: Deploy SAM application
+      run: |
+        sam deploy --template-file packaged.yaml --stack-name interphlix-authentication --capabilities CAPABILITY_IAM --region us-east-1
