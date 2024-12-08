@@ -24,10 +24,9 @@ jobs:
         cargo test
 
     - name: Install Zig toolchain
-      uses: korandoru/setup-zig@v1
-      with:
-        # Note: make sure you are using a recent version of zig (the one below isn't kept in sync with new releases)
-        zig-version: 'stable'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y zig
 
     - name: Install Cargo Lambda
       uses: jaxxstorm/action-install-gh-release@v1.9.0
