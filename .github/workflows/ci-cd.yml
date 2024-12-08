@@ -51,6 +51,5 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: 'us-west-2'
       run: |
-        # Package and deploy the Lambda function
-        zip -j function.zip target/x86_64-unknown-linux-gnu/release/bootstrap
-        aws lambda update-function-code --function-name interphlix-authentication --zip-file fileb://function.zip
+        # Deploy the pre-zipped Lambda function
+        aws lambda update-function-code --function-name interphlix-authentication --zip-file fileb://target/lambda/release/bootstrap.zip
