@@ -75,10 +75,17 @@ jobs:
       with:
         repo: cargo-lambda/cargo-lambda
 
+    - name: Ensure target directory exists
+      run: |
+        mkdir -p target/lambda/authentication
+
     - name: compile the code
       run: |
         cargo lambda build --output-format zip
-      
+
+    - name: Verify build output
+      run: |
+        ls -R target/lambda/authentication
     - name: Cache Cargo Lambda build
       uses: actions/cache@v3
       with:
