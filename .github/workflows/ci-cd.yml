@@ -43,12 +43,6 @@ jobs:
         cargo test
 
 
-    - name: Cache snapd
-      uses: actions/cache@v3
-      with:
-        path: /var/lib/snapd
-        key: ${{ runner.os }}-snapd
-
     - name: Cache Zig toolchain
       uses: actions/cache@v3
       with:
@@ -59,6 +53,12 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y snapd
+      
+    - name: Cache snapd
+      uses: actions/cache@v3
+      with:
+        path: /var/lib/snapd
+        key: ${{ runner.os }}-snapd
 
     - name: Install Zig toolchain
       run: |
@@ -91,8 +91,8 @@ jobs:
 
     - name: Package SAM application
       run: |
-        sam package --template-file template.yaml --s3-bucket interphlix-auth-code --output-template-file packaged.yaml
+        sam package --template-file template.yaml --s3-bucket interphlix-auth-code --output-template-file packaged.yaml --region us-east-1
 
     - name: Deploy SAM application
       run: |
-        sam deploy --template-file packaged.yaml --stack-name interphlix-authentication --capabilities CAPABILITY_IAM
+        sam deploy --template-file packaged.yaml --stack-name interphlix-authentication --capabilities CAPABILITY_IAM --region us-east-1
