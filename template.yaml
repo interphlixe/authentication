@@ -11,7 +11,7 @@ Resources:
   UsersTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: interphlix-Users
+      TableName: interphlix-users
       AttributeDefinitions:
         - AttributeName: id
           AttributeType: B  # Binary type for user ID
@@ -147,7 +147,7 @@ Resources:
       Variables:
         USERS_TABLE_NAME: !Ref UsersTable
         VERIFICATION_CODES_TABLE_NAME: !Ref VerificationCodesTable
-        ROLES_TABLE_NAME: !Ref RolesTable
+        # ROLES_TABLE_NAME: !Ref RolesTable
         ApiEvent:
           Type: Api
           Properties:
