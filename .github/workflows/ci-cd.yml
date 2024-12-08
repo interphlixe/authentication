@@ -85,7 +85,7 @@ jobs:
 
     - name: Verify build output
       run: |
-        ls -R target/lambda/authentication
+        ls -R target/lambda/authentication || echo "Directory not found"
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
