@@ -45,11 +45,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Deploy to AWS Lambda
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: 'us-west-2'
+    - name: Package SAM application
       run: |
-        # Deploy the pre-zipped Lambda function
-        aws lambda update-function-code --function-name interphlix-authentication --zip-file fileb://target/lambda/release/bootstrap.zip
+        sam package --template-file template.yaml --s3-bucket interphlix-auth-code --output-template-file packaged.yaml
+
+    - name: Deploy SAM application
+      run: |
+        sam deploy --template-file packaged.yaml --stack-name interphlix-authentication --capabilities CAPABILITY_IAM
