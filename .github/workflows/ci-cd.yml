@@ -81,7 +81,7 @@ jobs:
 
     - name: Compile the code in Amazon Linux 2
       run: |
-        docker run --rm -v $(pwd):/code -w /code rustserverless/lambda-rust:latest cargo lambda build --release --output-format zip
+        docker run --rm -v $(pwd):/code -w /code rustserverless/lambda-rust:latest cargo lambda build --release --target x86_64-unknown-linux-musl --output-format zip
     
     - name: Build SAM application
       run: |
