@@ -79,9 +79,9 @@ jobs:
       run: |
         mkdir -p target/lambda/authentication
 
-    - name: compile the code
+    - name: Compile the code in Amazon Linux 2
       run: |
-        cargo lambda build --output-format zip
+        docker run --rm -v $(pwd):/code -w /code rustserverless/lambda-rust:latest cargo lambda build --release --output-format zip
     
     - name: Build SAM application
       run: |
