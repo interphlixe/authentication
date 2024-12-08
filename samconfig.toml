@@ -8,4 +8,4 @@ s3_bucket = "interphlix-auth-code"
 s3_prefix = "interphlix-authentication"
 region = "us-east-1"
 capabilities = "CAPABILITY_IAM"
-confirm_changeset = true
+confirm_changeset = false
