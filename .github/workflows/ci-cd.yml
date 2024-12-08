@@ -18,17 +18,24 @@ jobs:
       with:
         rust-version: 'stable'
 
-    - name: Install dependencies
-      run: |
-        cargo build --release
-
     - name: Run tests
       run: |
         cargo test
 
-    - name: Build for x86_64-unknown-linux-gnu
+    - name: Install Zig toolchain
+        uses: korandoru/setup-zig@v1
+        with:
+          # Note: make sure you are using a recent version of zig (the one below isn't kept in sync with new releases)
+          zig-version: 'stable'
+
+      - name: Install Cargo Lambda
+        uses: jaxxstorm/action-install-gh-release@v1.9.0
+        with:
+          repo: cargo-lambda/cargo-lambda
+
+    - name: compile the code
       run: |
-        cargo build --release --target x86_64-unknown-linux-gnu
+        cargo lambda build --release
 
   deploy:
     runs-on: ubuntu-latest
