@@ -39,6 +39,8 @@ jobs:
         key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
           ${{ runner.os }}-cargo-build-
+
+    - name: Run tests
       run: |
         cargo test
 
