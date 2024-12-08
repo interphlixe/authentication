@@ -85,7 +85,7 @@ jobs:
 
     - name: compile the code
       run: |
-        cargo lambda build --output-format zip
+        cargo lambda build --output-format zip --output target/lambda/authentication
 
   deploy:
     runs-on: ubuntu-latest
