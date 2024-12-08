@@ -89,7 +89,7 @@ jobs:
 
     - name: Deploy SAM application
       run: |
-        sam deploy --template-file packaged.yaml --stack-name interphlix-authentication --capabilities CAPABILITY_IAM --region us-east-1 -y
+        sam deploy --template-file packaged.yaml --stack-name interphlix-authentication --capabilities CAPABILITY_IAM --region us-east-1
 
   # deploy:
   #   runs-on: ubuntu-latest
