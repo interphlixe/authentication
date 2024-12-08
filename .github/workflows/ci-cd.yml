@@ -86,13 +86,11 @@ jobs:
     - name: Verify build output
       run: |
         ls -R target/lambda/authentication
-    - name: Cache Cargo Lambda build
-      uses: actions/cache@v3
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
       with:
-        path: target/lambda
-        key: ${{ runner.os }}-cargo-lambda-build-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-lambda-build-
+        name: lambda-artifacts
+        path: target/lambda/authentication
 
   deploy:
     runs-on: ubuntu-latest
@@ -101,6 +99,11 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: lambda-artifacts
 
     - name: Package SAM application
       run: |
