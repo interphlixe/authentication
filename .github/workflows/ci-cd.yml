@@ -6,7 +6,7 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  build:
+  build & deploy:
     runs-on: ubuntu-latest
 
     env:
@@ -92,19 +92,6 @@ jobs:
         name: lambda-artifacts
         path: target/lambda/authentication
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Download build artifacts
-      uses: actions/download-artifact@v3
-      with:
-        name: lambda-artifacts
-
     - name: Package SAM application
       run: |
         sam package --template-file template.yaml --s3-bucket interphlix-auth-code --output-template-file packaged.yaml --region us-east-1
@@ -112,3 +99,24 @@ jobs:
     - name: Deploy SAM application
       run: |
         sam deploy --template-file packaged.yaml --stack-name interphlix-authentication --capabilities CAPABILITY_IAM --region us-east-1
+
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: build
+
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v2
+
+  #   - name: Download build artifacts
+  #     uses: actions/download-artifact@v3
+  #     with:
+  #       name: lambda-artifacts
+
+  #   - name: Package SAM application
+  #     run: |
+  #       sam package --template-file template.yaml --s3-bucket interphlix-auth-code --output-template-file packaged.yaml --region us-east-1
+
+  #   - name: Deploy SAM application
+  #     run: |
+  #       sam deploy --template-file packaged.yaml --stack-name interphlix-authentication --capabilities CAPABILITY_IAM --region us-east-1
