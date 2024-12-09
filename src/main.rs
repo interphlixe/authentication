@@ -1,4 +1,8 @@
 mod server;
+mod db;
+
+/// re-export all the puliclic contents of the `db` module.
+use db::*;
 
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + 'static>>;
