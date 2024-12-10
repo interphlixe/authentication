@@ -20,26 +20,32 @@ impl Type<Postgres> for EmailAddress {
 
 impl<'q> Encode<'q, Postgres> for EmailAddress {
     fn encode_by_ref(&self, buf: &mut Vec<u8>) -> sqlx::encode::IsNull {
-        let value = match self {
-            EmailAddress::New(address) => format!("New:{}", address),
-            EmailAddress::Verified(address) => format!("Verified:{}", address),
+        let json_value = match self {
+            EmailAddress::New(address) => serde_json::json!({
+                "email": address.to_string(),
+                "verified": false
+            }),
+            EmailAddress::Verified(address) => serde_json::json!({
+                "email": address.to_string(),
+                "verified": true
+            }),
         };
-        <String as Encode<Postgres>>::encode_by_ref(&value, buf)
+        let json_string = serde_json::to_string(&json_value).unwrap();
+        <String as Encode<Postgres>>::encode_by_ref(&json_string, buf)
     }
 }
 
 impl<'r> Decode<'r, Postgres> for EmailAddress {
     fn decode(value: PgValueRef<'r>) -> Result<Self, sqlx::error::BoxDynError> {
-        let s = <&str as Decode<Postgres>>::decode(value)?;
-        let parts: Vec<&str> = s.splitn(2, ':').collect();
-        if parts.len() != 2 {
-            return Err("Invalid format for EmailAddress".into());
-        }
-        let address = Address::from_str(parts[1])?;
-        match parts[0] {
-            "New" => Ok(EmailAddress::New(address)),
-            "Verified" => Ok(EmailAddress::Verified(address)),
-            _ => Err("Unknown variant for EmailAddress".into()),
+        let json_string = <&str as Decode<Postgres>>::decode(value)?;
+        let json_value: serde_json::Value = serde_json::from_str(json_string)?;
+        let email = json_value.get("email").and_then(|v| v.as_str()).ok_or("Missing email")?;
+        let verified = json_value.get("verified").and_then(|v| v.as_bool()).ok_or("Missing verified")?;
+        let address = Address::from_str(email)?;
+        if verified {
+            Ok(EmailAddress::Verified(address))
+        } else {
+            Ok(EmailAddress::New(address))
         }
     }
 }
