@@ -31,8 +31,7 @@ impl<'q> Encode<'q, Postgres> for EmailAddress {
             }),
         };
         let json_string = serde_json::to_string(&json_value)?;
-        <String as Encode<Postgres>>::encode_by_ref(&json_string, buf)?;
-        Ok(sqlx::encode::IsNull::No)
+        <String as Encode<Postgres>>::encode_by_ref(&json_string, buf)
     }
 }
 
