@@ -65,7 +65,7 @@ impl<'de> Visitor<'de> for EmailAddressVisitor {
         }
         let email: String = email.ok_or_else(|| de::Error::missing_field("email"))?;
         let verified: bool = verified.ok_or_else(|| de::Error::missing_field("verified"))?;
-        let address = Address::new(email).map_err(de::Error::custom)?;
+        let address = email.parse::<Address>().map_err(de::Error::custom)?;
         Ok(if verified {
             EmailAddress::Verified(address)
         } else {
@@ -90,14 +90,14 @@ mod tests {
 
     #[test]
     fn test_serialize_new() {
-        let email = EmailAddress::New(Address::new("user@domain.com".to_string()).unwrap());
+        let email = EmailAddress::New("user@domain.com".parse::<Address>().unwrap());
         let json = serde_json::to_string(&email).unwrap();
         assert_eq!(json, r#"{"email":"user@domain.com","verified":false}"#);
     }
 
     #[test]
     fn test_serialize_verified() {
-        let email = EmailAddress::Verified(Address::new("user@domain.com".to_string()).unwrap());
+        let email = EmailAddress::Verified("user@domain.com".parse::<Address>().unwrap());
         let json = serde_json::to_string(&email).unwrap();
         assert_eq!(json, r#"{"email":"user@domain.com","verified":true}"#);
     }
