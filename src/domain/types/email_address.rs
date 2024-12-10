@@ -1,12 +1,47 @@
-use lettre::Address;
+use sqlx::postgres::{PgTypeInfo, PgValueRef};
 use serde::{Serialize, Deserialize, Serializer, Deserializer};
 use serde::ser::SerializeStruct;
 use serde::de::{self, Visitor, MapAccess};
+use sqlx::{Encode, Decode, Postgres, Type, ValueRef};
+use lettre::Address;
+use std::str::FromStr;
 use std::fmt;
 
 pub enum EmailAddress {
     New(Address),
     Verified(Address),
+}
+
+impl Type<Postgres> for EmailAddress {
+    fn type_info() -> PgTypeInfo {
+        <String as Type<Postgres>>::type_info()
+    }
+}
+
+impl<'q> Encode<'q, Postgres> for EmailAddress {
+    fn encode_by_ref(&self, buf: &mut Vec<u8>) -> sqlx::encode::IsNull {
+        let value = match self {
+            EmailAddress::New(address) => format!("New:{}", address),
+            EmailAddress::Verified(address) => format!("Verified:{}", address),
+        };
+        <String as Encode<Postgres>>::encode_by_ref(&value, buf)
+    }
+}
+
+impl<'r> Decode<'r, Postgres> for EmailAddress {
+    fn decode(value: PgValueRef<'r>) -> Result<Self, sqlx::error::BoxDynError> {
+        let s = <&str as Decode<Postgres>>::decode(value)?;
+        let parts: Vec<&str> = s.splitn(2, ':').collect();
+        if parts.len() != 2 {
+            return Err("Invalid format for EmailAddress".into());
+        }
+        let address = Address::from_str(parts[1])?;
+        match parts[0] {
+            "New" => Ok(EmailAddress::New(address)),
+            "Verified" => Ok(EmailAddress::Verified(address)),
+            _ => Err("Unknown variant for EmailAddress".into()),
+        }
+    }
 }
 
 impl Serialize for EmailAddress {
