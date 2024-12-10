@@ -14,12 +14,12 @@ pub enum EmailAddress {
 
 impl Type<Postgres> for EmailAddress {
     fn type_info() -> PgTypeInfo {
-        <String as Type<Postgres>>::type_info()
+        PgTypeInfo::with_name("jsonb")
     }
 }
 
 impl<'q> Encode<'q, Postgres> for EmailAddress {
-    fn encode_by_ref(&self, buf: &mut Vec<u8>) -> sqlx::encode::IsNull {
+    fn encode_by_ref(&self, buf: &mut PgArgumentBuffer) -> Result<sqlx::encode::IsNull, Box<dyn std::error::Error + Send + Sync>> {
         let json_value = match self {
             EmailAddress::New(address) => serde_json::json!({
                 "email": address.to_string(),
@@ -30,8 +30,9 @@ impl<'q> Encode<'q, Postgres> for EmailAddress {
                 "verified": true
             }),
         };
-        let json_string = serde_json::to_string(&json_value).unwrap();
-        <String as Encode<Postgres>>::encode_by_ref(&json_string, buf)
+        let json_string = serde_json::to_string(&json_value)?;
+        <String as Encode<Postgres>>::encode_by_ref(&json_string, buf)?;
+        Ok(sqlx::encode::IsNull::No)
     }
 }
 
