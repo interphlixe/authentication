@@ -2,7 +2,7 @@ use sqlx::{Encode, Decode, Type, Postgres, postgres::{PgValueRef, PgTypeInfo, Pg
 use serde::{Serialize, Deserialize};
 use bson::oid::ObjectId;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Default)]
 pub struct Id(ObjectId);
 
 

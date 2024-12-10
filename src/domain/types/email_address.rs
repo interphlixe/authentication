@@ -1,12 +1,13 @@
 use sqlx::postgres::{PgTypeInfo, PgValueRef, PgArgumentBuffer};
 use serde::{Serialize, Deserialize, Serializer, Deserializer};
-use serde::ser::SerializeStruct;
-use serde::de::{self, Visitor, MapAccess};
 use sqlx::{Encode, Decode, Postgres, Type, ValueRef};
-use lettre::Address;
+use serde::de::{self, Visitor, MapAccess};
+use serde::ser::SerializeStruct;
 use std::str::FromStr;
+use lettre::Address;
 use std::fmt;
 
+#[derive(Clone, Debug)]
 pub enum EmailAddress {
     New(Address),
     Verified(Address),

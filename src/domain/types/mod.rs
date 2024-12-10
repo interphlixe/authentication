@@ -1,4 +1,6 @@
-mod id;
 mod email_address;
+mod user;
+mod id;
 
-use id::*;
+pub use email_address::*;
+pub use id::*;
