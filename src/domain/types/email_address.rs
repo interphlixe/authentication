@@ -1,4 +1,4 @@
-use sqlx::postgres::{PgTypeInfo, PgValueRef};
+use sqlx::postgres::{PgTypeInfo, PgValueRef, PgArgumentBuffer};
 use serde::{Serialize, Deserialize, Serializer, Deserializer};
 use serde::ser::SerializeStruct;
 use serde::de::{self, Visitor, MapAccess};
