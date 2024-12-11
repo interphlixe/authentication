@@ -11,5 +11,6 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error + 'static>>;
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    init().await?;
     Ok(server::start().await?)
 }
