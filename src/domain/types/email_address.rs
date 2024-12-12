@@ -38,16 +38,8 @@ impl<'q> Encode<'q, Postgres> for EmailAddress {
 
 impl<'r> Decode<'r, Postgres> for EmailAddress {
     fn decode(value: PgValueRef<'r>) -> Result<Self, sqlx::error::BoxDynError> {
-        let json_string = <&str as Decode<Postgres>>::decode(value)?;
-        let json_value: serde_json::Value = serde_json::from_str(json_string)?;
-        let email = json_value.get("email").and_then(|v| v.as_str()).ok_or("Missing email")?;
-        let verified = json_value.get("verified").and_then(|v| v.as_bool()).ok_or("Missing verified")?;
-        let address = Address::from_str(email)?;
-        if verified {
-            Ok(EmailAddress::Verified(address))
-        } else {
-            Ok(EmailAddress::New(address))
-        }
+        let json = <&str as Decode<Postgres>>::decode(value)?;
+        Ok(serde_json::from_str(json)?)
     }
 }
 
