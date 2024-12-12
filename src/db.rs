@@ -18,6 +18,7 @@ CREATE TABLE users (
      first_name TEXT NOT NULL,
      last_name TEXT NOT NULL,
      password TEXT NOT NULL,
+     profile_picture TEXT,
      created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
  );
 "#;
@@ -31,6 +32,7 @@ ADD COLUMN IF NOT EXISTS user_name TEXT NOT NULL,
 ADD COLUMN IF NOT EXISTS first_name TEXT NOT NULL,
 ADD COLUMN IF NOT EXISTS last_name TEXT NOT NULL,
 ADD COLUMN IF NOT EXISTS password TEXT NOT NULL,
+ADD COLUMN IF NOT EXISTS profile_picture TEXT,
 ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 "#;
 
@@ -90,6 +92,7 @@ pub async fn init() -> Result<Pool<Postgres>> {
                             create_db(&name, url).await?;
                             uris.push_back(db_url());
                         }
+                        result = Some(Err(err.into()))
                     },
                     _ => result = Some(Err(err.into()))
                 }
