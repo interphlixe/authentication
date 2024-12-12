@@ -1,3 +1,4 @@
+use actix_web::HttpResponse;
 use crate::User;
 use crate::user;
 use super::*;
@@ -7,5 +8,5 @@ async fn signup(user: web::Json<User>, data: web::Data<Pool<Postgres>>) -> Resul
     let executor = data.get_ref();
     let user = user.into_inner();
     let created_user = user::create_user(executor, user).await?;
-    Ok(serde_json::to_string(&created_user))
+    Ok(HttpResponse::Ok().json(created_user))
 }
