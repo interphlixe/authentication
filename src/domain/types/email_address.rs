@@ -1,6 +1,6 @@
+use sqlx::{Encode, Decode, Postgres, Type, ValueRef, types::Json};
 use sqlx::postgres::{PgTypeInfo, PgValueRef, PgArgumentBuffer};
 use serde::{Serialize, Deserialize, Serializer, Deserializer};
-use sqlx::{Encode, Decode, Postgres, Type, ValueRef};
 use serde::de::{self, Visitor, MapAccess};
 use serde::ser::SerializeStruct;
 use std::str::FromStr;
@@ -15,7 +15,7 @@ pub enum EmailAddress {
 
 impl Type<Postgres> for EmailAddress {
     fn type_info() -> PgTypeInfo {
-        PgTypeInfo::with_name("jsonb")
+        <Json<EmailAddress> as Type<Postgres>>::type_info()
     }
 }
 
@@ -38,8 +38,8 @@ impl<'q> Encode<'q, Postgres> for EmailAddress {
 
 impl<'r> Decode<'r, Postgres> for EmailAddress {
     fn decode(value: PgValueRef<'r>) -> Result<Self, sqlx::error::BoxDynError> {
-        let json = <&str as Decode<Postgres>>::decode(value)?;
-        Ok(serde_json::from_str(json)?)
+        let json = <Json<EmailAddress> as Decode<Postgres>>::decode(value)?.0;
+        Ok(json)
     }
 }
 
