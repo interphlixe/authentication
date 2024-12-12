@@ -1,20 +1,28 @@
-use actix_web::{HttpServer, App, Responder, web, get};
+use actix_web::{HttpServer, App, Responder, web, get, post};
+use sqlx::{Pool, Postgres};
 use static_init::dynamic;
+use super::init;
+use user::*;
+
+mod user;
 
 
-type Result<T> = std::result::Result<T, std::io::Error>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 #[dynamic]
 static PORT: u16 = read_port("PORT").unwrap_or(8080);
 
 ///Start a new Http server.
 pub async fn start() -> Result<()> {
-    HttpServer::new(|| {
-        App::new().service(hello)
+    let db = init().await?;
+    let data = web::Data::new(db);
+    HttpServer::new(move|| {
+        App::new().app_data(data.clone()).service(hello).service(signup)
     })
     .bind(("127.0.0.1", *PORT))?
     .run()
-    .await
+    .await?;
+    Ok(())
 }
 
 /// This function reads the posrt to be used from the environment variable with the given key.
