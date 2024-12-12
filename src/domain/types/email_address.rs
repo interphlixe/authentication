@@ -69,7 +69,7 @@ impl<'de> Visitor<'de> for EmailAddressVisitor {
     type Value = EmailAddress;
 
     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        formatter.write_str("struct EmailAddress")
+        formatter.write_str("a string or a struct EmailAddress")
     }
 
     fn visit_map<V>(self, mut map: V) -> Result<EmailAddress, V::Error>
@@ -106,6 +106,16 @@ impl<'de> Visitor<'de> for EmailAddressVisitor {
             EmailAddress::New(address)
         })
     }
+
+    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+        where
+            E: de::Error, {
+        let address = match v.parse::<Address>() {
+            Ok(address) => address,
+            Err(err) => return Err(de::Error::custom(err))
+        };
+        Ok(EmailAddress::New(address))
+    }
 }
 
 impl<'de> Deserialize<'de> for EmailAddress {
@@ -113,7 +123,7 @@ impl<'de> Deserialize<'de> for EmailAddress {
     where
         D: Deserializer<'de>,
     {
-        deserializer.deserialize_struct("EmailAddress", &["email", "verified"], EmailAddressVisitor)
+        deserializer.deserialize_any(EmailAddressVisitor)
     }
 }
 
