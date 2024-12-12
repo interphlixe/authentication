@@ -1,6 +1,6 @@
 use serde::{Serialize, Deserialize};
 use sqlx::{Encode, Decode, FromRow};
-// use chrono::{DateTime, offset::Utc};
+use chrono::{DateTime, offset::Utc};
 use super::{Id, EmailAddress};
 
 #[derive(Clone, Debug, Serialize, Deserialize, Encode, Decode, FromRow)]
@@ -13,6 +13,7 @@ pub struct User {
     pub last_name: String,
     pub password: String,
     #[serde(default)]
-    // pub created_at: DateTime<Utc>,
+    pub created_at: DateTime<Utc>,
+    #[serde(default)]
     pub profile_picture: Option<String>
 }
