@@ -1,5 +1,6 @@
 use sqlx::{Encode, Decode, Type, Postgres, postgres::{PgValueRef, PgTypeInfo, PgArgumentBuffer}};
 use serde::{Serialize, Deserialize};
+use std::ops::{Deref, DerefMut};
 use bson::oid::ObjectId;
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
@@ -32,5 +33,19 @@ impl<'r> Decode<'r, Postgres> for Id {
         let byte_array: [u8; 12] = bytes.as_ref().try_into().map_err(|_| "Invalid length")?;
         let object_id = ObjectId::from_bytes(byte_array);
         Ok(Id(object_id))
+    }
+}
+
+
+impl Deref for Id {
+    type Target = ObjectId;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Id {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
