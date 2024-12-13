@@ -1,19 +1,19 @@
 use actix_web::{HttpServer, App, Responder, web, get, post};
 use sqlx::{Pool, Postgres};
 use static_init::dynamic;
-use super::init;
+use super::{init, Error};
 use user::*;
 
 mod user;
 
 
-type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+type Result<T> = std::result::Result<T, Error>;
 
 #[dynamic]
 static PORT: u16 = read_port("PORT").unwrap_or(8080);
 
 ///Start a new Http server.
-pub async fn start() -> Result<()> {
+pub async fn start() -> super::Result<()> {
     let db = init().await?;
     let data = web::Data::new(db);
     HttpServer::new(move|| {

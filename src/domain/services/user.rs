@@ -1,8 +1,8 @@
-use sqlx::{Postgres, Pool, query_as, query, FromRow, Error};
-use super::{User, Id, EmailAddress};
+use sqlx::{Postgres, Pool, query_as, query, FromRow, Error as SqlxError};
+use super::{User, Id, EmailAddress, Error};
 
 type Executor = Pool<Postgres>;
-type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+type Result<T> = std::result::Result<T, Error>;
 
 pub async fn create_user(executor: &Executor, user: User) -> Result<User> {
     user_by_email_does_not_exist(executor, &user.email).await?;
@@ -23,10 +23,10 @@ async fn user_by_email_does_not_exist(executor: &Executor, email: &EmailAddress)
     let email = match email{New(address)=>address.to_string(), Verified(address)=>address.to_string()};
     let result = query!(r#"SELECT id FROM users WHERE email->>'email' = $1;"#, email).fetch_one(executor).await;
     match result {
-        Ok(record) => Err("user with this email already exists.".into()),
+        Ok(record) => Err(Error::UserWithEmailExists),
         Err(err) => {
             match err {
-                Error::RowNotFound => Ok(()),
+                SqlxError::RowNotFound => Ok(()),
                 _ => Err(err)?
             }
         }

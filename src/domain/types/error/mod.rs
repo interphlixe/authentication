@@ -49,3 +49,10 @@ impl From<SqlxError> for Error {
         Error::Custom(StatusCode::INTERNAL_SERVER_ERROR, err.into())
     }
 }
+
+
+impl From<&str> for Error {
+    fn from(err: &str) -> Self {
+        Error::Custom(StatusCode::INTERNAL_SERVER_ERROR, err.into())
+    }
+}
