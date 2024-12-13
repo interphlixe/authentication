@@ -17,7 +17,10 @@ pub async fn start() -> super::Result<()> {
     let db = init().await?;
     let data = web::Data::new(db);
     HttpServer::new(move|| {
-        App::new().app_data(data.clone()).service(hello).service(signup)
+        App::new().app_data(data.clone())
+        .service(hello)
+        .service(signup)
+        .service(get_user)
     })
     .bind(("127.0.0.1", *PORT))?
     .run()

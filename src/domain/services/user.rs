@@ -32,3 +32,17 @@ async fn user_by_email_does_not_exist(executor: &Executor, email: &EmailAddress)
         }
     }
 }
+
+
+pub async fn get_user_by_id(executor: &Executor, id: Id) -> Result<User> {
+    let result = query_as("SELECT * FROM users_view WHERE id = $1").bind(id).fetch_one(executor).await;
+    match result {
+        Ok(user) => Ok(user),
+        Err(err) => {
+            match err {
+                SqlxError::RowNotFound => Err(Error::UserNotFound),
+                _ => Err(err)?
+            }
+        }
+    }
+}

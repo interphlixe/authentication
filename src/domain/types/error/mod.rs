@@ -38,7 +38,7 @@ impl ResponseError for Error {
             UserWithEmailExists => HttpResponse::Conflict().json(json!({"message": "user with the same email already exists"})),
             UserNotFound => HttpResponse::NotFound().json(json!({"message": "user not found"})),
             InternalServerError(_) => HttpResponse::InternalServerError().json(json!({"message": "internal server error"})),
-            Custom(status, _) => HttpResponse::build(*status).json(json!({"message": "unexpected error. will be worked on soon"}))
+            Custom(status, err) => HttpResponse::build(*status).json(json!({"message": format!("{}", err)}))
         }
     }
 }

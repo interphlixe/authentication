@@ -11,6 +11,8 @@ pub struct User {
     pub user_name: String,
     pub first_name: String,
     pub last_name: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
+    #[sqlx(default)]
     pub password: String,
     #[serde(default = "Utc::now")]
     pub created_at: DateTime<Utc>,

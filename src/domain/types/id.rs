@@ -1,6 +1,8 @@
 use sqlx::{Encode, Decode, Type, Postgres, postgres::{PgValueRef, PgTypeInfo, PgArgumentBuffer}};
 use serde::{Serialize, Deserialize};
 use std::ops::{Deref, DerefMut};
+use std::str::FromStr;
+
 use bson::oid::ObjectId;
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
@@ -47,5 +49,13 @@ impl Deref for Id {
 impl DerefMut for Id {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
+    }
+}
+
+
+impl FromStr for Id {
+    type Err = Box<dyn std::error::Error>;
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        Ok(Id(ObjectId::from_str(s)?))
     }
 }
