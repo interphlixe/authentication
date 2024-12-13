@@ -21,18 +21,8 @@ impl Type<Postgres> for EmailAddress {
 
 impl<'q> Encode<'q, Postgres> for EmailAddress {
     fn encode_by_ref(&self, buf: &mut PgArgumentBuffer) -> Result<sqlx::encode::IsNull, Box<dyn std::error::Error + Send + Sync>> {
-        let json_value = match self {
-            EmailAddress::New(address) => serde_json::json!({
-                "email": address.to_string(),
-                "verified": false
-            }),
-            EmailAddress::Verified(address) => serde_json::json!({
-                "email": address.to_string(),
-                "verified": true
-            }),
-        };
-        let json_string = serde_json::to_string(&json_value)?;
-        <String as Encode<Postgres>>::encode_by_ref(&json_string, buf)
+        let json = Json::from(self);
+        <Json<&EmailAddress> as Encode<Postgres>>::encode_by_ref(&json, buf)
     }
 }
 
