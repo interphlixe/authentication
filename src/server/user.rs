@@ -1,5 +1,6 @@
-use actix_web::{http::StatusCode, web::{Data, Json, Path}, HttpResponse, delete};
-use serde_json::json;
+use actix_web::{http::StatusCode, web::{Data, Json, Path}, HttpResponse, delete, put};
+use serde_json::{json, Value};
+use std::collections::HashMap;
 use crate::User;
 use crate::user;
 use super::*;
@@ -30,4 +31,15 @@ async fn delete_user(id: Path<String>,data: Data<Pool<Postgres>>) -> Result<impl
     let executor = data.get_ref();
     user::delete_user_by_id(executor, id).await?;
     Ok(HttpResponse::Ok().json(json!("user delted successfully")))
+}
+
+
+#[put("/users/{id}")]
+async fn update_user(id: Path<String>,data: Data<Pool<Postgres>>, map: Json<HashMap<String, Value>>) -> Result<impl Responder> {
+    let id = id.into_inner();
+    let id = id.as_str().parse().map_err(|_|{Error::Custom(StatusCode::BAD_REQUEST, "invalid id".into())})?;
+    let executor = data.get_ref();
+    let map = map.0;
+    let user = user::update_user_by_id(executor, id, map).await?;
+    Ok(HttpResponse::Ok().json(json!(user)))
 }

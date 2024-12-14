@@ -1,5 +1,8 @@
+use actix_web::http::StatusCode;
 use sqlx::{Postgres, Pool, query_as, query, FromRow, Error as SqlxError};
 use super::{User, Id, EmailAddress, Error};
+use std::collections::HashMap;
+use serde_json::Value;
 
 type Executor = Pool<Postgres>;
 type Result<T> = std::result::Result<T, Error>;
@@ -49,6 +52,36 @@ pub async fn get_user_by_id(executor: &Executor, id: Id) -> Result<User> {
 
 
 pub async fn delete_user_by_id(executor: &Executor, id: Id) -> Result<()> {
-    query!("DELETE FROM users WHERE id = $1", &id.bytes()).execute(executor).await?;
+    query!("DELETE FROM users WHERE id = $1;", &id.bytes()).execute(executor).await?;
     Ok(())
+}
+
+
+
+pub async fn update_user_by_id(executor: &Executor, id: Id, mut map: HashMap<String, Value>) -> Result<User> {
+    let fields = ["user_name", "first_name", "last_name"];
+    let mut updates = Vec::new();
+    let mut values = Vec::new();
+    for field in fields {
+        match map.remove(field) {
+            None => (),
+            Some(value) => {
+                match value.as_str() {
+                    Some(value) => {
+                        updates.push(format!("{} = ?", field));
+                        values.push(value.to_string())
+                    },
+                    None => return Err(Error::Custom(StatusCode::BAD_REQUEST, format!("expected a string from field: {}", field).into()))
+                }
+            }
+        }
+    }
+    let statement = format!("UPDATE users SET {} WHERE id = ? RETURNING *;", updates.join(", "));
+    let mut query = query_as::<Postgres, User>(&statement);
+    for value in values {
+        query = query.bind(value);
+    }
+    query = query.bind(id);
+    let user = query.fetch_one(executor).await?;
+    Ok(user)
 }
