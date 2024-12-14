@@ -49,6 +49,6 @@ pub async fn get_user_by_id(executor: &Executor, id: Id) -> Result<User> {
 
 
 pub async fn delete_user_by_id(executor: &Executor, id: Id) -> Result<()> {
-    query!("DELETE FROM users WHERE id = $1", &id.bytes()).execute(executor).await?;
+    // query!("DELETE FROM users WHERE id = $1", &id.bytes()).execute(executor).await?;
     Ok(())
 }

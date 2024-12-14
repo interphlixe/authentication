@@ -1,11 +1,11 @@
 use sqlx::{Encode, Decode, Type, Postgres, postgres::{PgValueRef, PgTypeInfo, PgArgumentBuffer}};
-use serde::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize, Serializer};
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 
 use bson::oid::ObjectId;
 
-#[derive(Clone, Debug, Serialize, Deserialize, Default)]
+#[derive(Clone, Debug, Deserialize, Default)]
 pub struct Id(ObjectId);
 
 
@@ -57,5 +57,14 @@ impl FromStr for Id {
     type Err = Box<dyn std::error::Error>;
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
         Ok(Id(ObjectId::from_str(s)?))
+    }
+}
+
+
+impl Serialize for Id {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+        where
+            S: Serializer {
+        serializer.serialize_str(&self.0.to_hex())
     }
 }
