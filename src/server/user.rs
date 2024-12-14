@@ -1,4 +1,5 @@
-use actix_web::{http::StatusCode, web::{Data, Json, Path}, HttpResponse};
+use actix_web::{http::StatusCode, web::{Data, Json, Path}, HttpResponse, delete};
+use serde_json::json;
 use crate::User;
 use crate::user;
 use super::*;
@@ -8,7 +9,7 @@ async fn signup(user: Json<User>, data: Data<Pool<Postgres>>) -> Result<impl Res
     let executor = data.get_ref();
     let user = user.into_inner();
     let created_user = user::create_user(executor, user).await?;
-    Ok(HttpResponse::Ok().json(created_user))
+    Ok(HttpResponse::Created().json(created_user))
 }
 
 
@@ -19,4 +20,14 @@ async fn get_user(id: Path<String>,data: Data<Pool<Postgres>>) -> Result<impl Re
     let executor = data.get_ref();
     let user = user::get_user_by_id(executor, id).await?;
     Ok(HttpResponse::Ok().json(user))
+}
+
+
+#[delete("/users/{id}")]
+async fn delete_user(id: Path<String>,data: Data<Pool<Postgres>>) -> Result<impl Responder> {
+    let id = id.into_inner();
+    let id = id.as_str().parse().map_err(|_|{Error::Custom(StatusCode::BAD_REQUEST, "invalid id".into())})?;
+    let executor = data.get_ref();
+    user::delete_user_by_id(executor, id).await?;
+    Ok(HttpResponse::Ok().json(json!("user delted successfully")))
 }

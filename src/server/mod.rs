@@ -21,6 +21,7 @@ pub async fn start() -> super::Result<()> {
         .service(hello)
         .service(signup)
         .service(get_user)
+        .service(delete_user)
     })
     .bind(("127.0.0.1", *PORT))?
     .run()
