@@ -1,4 +1,5 @@
 use actix_web::{HttpServer, App, Responder, web, get, post, error::{InternalError, JsonPayloadError}, HttpRequest, HttpResponse, Error as ActixError};
+use lettre::{AsyncSmtpTransport, Tokio1Executor};
 use sqlx::{Pool, Postgres};
 use static_init::dynamic;
 use super::{init, Error};
@@ -8,7 +9,9 @@ use user::*;
 mod user;
 
 
+type Mailer = AsyncSmtpTransport<Tokio1Executor>;
 type Result<T> = std::result::Result<T, Error>;
+type Db = Pool<Postgres>;
 
 #[dynamic]
 static PORT: u16 = read_port("PORT").unwrap_or(8080);
@@ -16,7 +19,8 @@ static PORT: u16 = read_port("PORT").unwrap_or(8080);
 ///Start a new Http server.
 pub async fn start() -> super::Result<()> {
     let db = init().await?;
-    let data = web::Data::new(db);
+    let mailer = crate::mail::mailer();
+    let data = web::Data::new((db, mailer));
     let json_config = web::JsonConfig::default().error_handler(json_error_handler);
     HttpServer::new(move|| {
         App::new()
