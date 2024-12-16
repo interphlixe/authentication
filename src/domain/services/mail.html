@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+ <html lang="en">
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Email Verification</title>
+     <style>
+         body {
+             font-family: Arial, sans-serif;
+             background-color: #e9e7e2;
+             margin: 0;
+             padding: 0;
+         }
+         .container {
+             max-width: 600px;
+             margin: 20px auto;
+             background-color: #ffffff;
+             padding: 20px;
+             border-radius: 8px;
+             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+             border-top: 5px solid #00796b;
+         }
+         .header {
+             text-align: center;
+             padding: 10px 0;
+             background-color: #00796b;
+             color: #ffffff;
+             border-radius: 8px 8px 0 0;
+         }
+         .header h1 {
+             margin: 0;
+         }
+         .content {
+             margin: 20px 0;
+             text-align: center;
+         }
+         .content p {
+             color: #555555;
+             line-height: 1.5;
+         }
+         .button {
+             display: inline-block;
+             margin-top: 20px;
+             padding: 10px 20px;
+             background-color: #00796b;
+             color: #ffffff;
+             text-decoration: none;
+             border-radius: 5px;
+         }
+         .footer {
+             text-align: center;
+             margin-top: 20px;
+             color: #999999;
+             font-size: 12px;
+         }
+     </style>
+ </head>
+ <body>
+     <div class="container">
+         <div class="header">
+             <h1>Verify Your Email</h1>
+         </div>
+         <div class="content">
+             <p>Thank you for signing up! Please verify your email addres
+ by clicking the button below or using the verification code provided.</p>
+             <a href="{{verification_link}}" class="button">Verify
+ Email</a>
+             <p>Or use this verification code:
+ <strong>{{verification_code}}</strong></p>
+         </div>
+         <div class="footer">
+             <p>If you did not sign up for this account, you can ignore
+ this email.</p>
+         </div>
+     </div>
+ </body>
+ </html>
