@@ -20,7 +20,7 @@ pub async fn send_mail(receiver: Mailbox, subject: &str, message: String) -> Res
 }
 
 
-fn mailer() -> AsyncSmtpTransport<Tokio1Executor> {
+pub fn mailer() -> AsyncSmtpTransport<Tokio1Executor> {
     let url = smtp_url();
     let mailer = AsyncSmtpTransport::<Tokio1Executor>::from_url(
         &url,
