@@ -1,7 +1,7 @@
 use actix_web::{http::StatusCode, web::{Data, Json, Path}, HttpResponse, delete, put};
-use serde_json::{json, Value};
 use std::collections::HashMap;
-use crate::User;
+use serde_json::json;
+use crate::{User, Value};
 use crate::user;
 use super::*;
 

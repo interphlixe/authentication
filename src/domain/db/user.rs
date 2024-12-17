@@ -1,7 +1,7 @@
 use actix_web::http::StatusCode;
-use sqlx::{Pool, Postgres, query, query_as, Error as SqlxError};
+use sqlx::{query, query_as, Error as SqlxError, Execute, Pool, Postgres};
 use std::collections::HashMap;
-use serde_json::Value;
+use super::Value;
 use super::*;
 
 type Executor = Pool<Postgres>;
@@ -81,6 +81,7 @@ pub async fn update_user_by_id<'a>(executor: &Executor, id: &Id, map: &HashMap<&
         query = query.bind(value);
     }
     query = query.bind(id);
+    println!("{}", query.sql());
     let user = query.fetch_one(executor).await?;
     Ok(user)
 }
