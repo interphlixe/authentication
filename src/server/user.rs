@@ -19,7 +19,7 @@ async fn get_user(id: Path<String>, data: Data<(Db, Mailer)>) -> Result<impl Res
     let id = id.into_inner();
     let id = id.as_str().parse().map_err(|_|{Error::Custom(StatusCode::BAD_REQUEST, "invalid id".into())})?;
     let executor = &data.0;
-    let user = user::get_user_by_id(executor, id).await?;
+    let user = user::get_user_by_id(executor, &id).await?;
     Ok(HttpResponse::Ok().json(user))
 }
 
@@ -29,7 +29,7 @@ async fn delete_user(id: Path<String>, data: Data<(Db, Mailer)>) -> Result<impl 
     let id = id.into_inner();
     let id = id.as_str().parse().map_err(|_|{Error::Custom(StatusCode::BAD_REQUEST, "invalid id".into())})?;
     let executor = &data.0;
-    user::delete_user_by_id(executor, id).await?;
+    user::delete_user_by_id(executor, &id).await?;
     Ok(HttpResponse::Ok().json(json!("user delted successfully")))
 }
 
@@ -40,6 +40,6 @@ async fn update_user(id: Path<String>, data: Data<(Db, Mailer)>, map: Json<HashM
     let id = id.as_str().parse().map_err(|_|{Error::Custom(StatusCode::BAD_REQUEST, "invalid id".into())})?;
     let executor = &data.0;
     let map = map.0;
-    let user = user::update_user_by_id(executor, id, map).await?;
+    let user = user::update_user_by_id(executor, &id, map).await?;
     Ok(HttpResponse::Ok().json(json!(user)))
 }

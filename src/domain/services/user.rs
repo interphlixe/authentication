@@ -1,91 +1,60 @@
 use actix_web::http::StatusCode;
 use sqlx::{query, query_as, Error as SqlxError, Execute, FromRow, Pool, Postgres};
-use super::{User, Id, EmailAddress, Error};
+use super::{db, EmailAddress, Error, Id, User};
 use std::collections::HashMap;
-use serde_json::Value;
+use serde_json::{Number, Value};
 
 type Executor = Pool<Postgres>;
 type Result<T> = std::result::Result<T, Error>;
 
-pub async fn create_user(executor: &Executor, user: User) -> Result<User> {
-    user_by_email_does_not_exist(executor, &user.email).await?;
-    let created_user = query_as(r#"
-    INSERT INTO users 
-    (id, email, user_name, first_name, last_name, password, created_at, profile_picture)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-    RETURNING id, email, user_name, first_name, last_name, password, created_at, profile_picture;
-    "#,)
-    .bind(user.id).bind(user.email).bind(user.user_name).bind(user.first_name).bind(user.last_name).bind(user.password).bind(user.created_at).bind(user.profile_picture)
-    .fetch_one(executor).await?;
-    Ok(created_user)
-}
-
-
-async fn user_by_email_does_not_exist(executor: &Executor, email: &EmailAddress) -> Result<()> {
-    use EmailAddress::*;
-    let email = match email{New(address)=>address.to_string(), Verified(address)=>address.to_string()};
-    let result = query!(r#"SELECT id FROM users WHERE email->>'email' = $1;"#, email).fetch_one(executor).await;
-    match result {
-        Ok(record) => Err(Error::UserWithEmailExists),
-        Err(err) => {
-            match err {
-                SqlxError::RowNotFound => Ok(()),
-                _ => Err(err)?
-            }
-        }
-    }
-}
-
-
-pub async fn get_user_by_id(executor: &Executor, id: Id) -> Result<User> {
-    let result = query_as("SELECT * FROM users_view WHERE id = $1").bind(id).fetch_one(executor).await;
-    match result {
-        Ok(user) => Ok(user),
-        Err(err) => {
-            match err {
-                SqlxError::RowNotFound => Err(Error::UserNotFound),
-                _ => Err(err)?
-            }
-        }
-    }
-}
-
-
-pub async fn delete_user_by_id(executor: &Executor, id: Id) -> Result<()> {
-    query!("DELETE FROM users WHERE id = $1;", &id.bytes()).execute(executor).await?;
-    Ok(())
-}
-
-
-pub async fn update_user_by_id(executor: &Executor, id: Id, mut map: HashMap<String, Value>) -> Result<User> {
-    let fields = ["user_name", "first_name", "last_name"];
-    let mut updates = Vec::new();
-    let mut values = Vec::new();
-    let mut number = 1u8;
-    for field in fields {
-        match map.remove(field) {
-            None => (),
-            Some(value) => {
-                match value.as_str() {
-                    Some(value) => {
-                        updates.push(format!("{} = ${}", field, number));
-                        values.push(value.to_string());
-                        number+=1;
-                    },
-                    None => return Err(Error::Custom(StatusCode::BAD_REQUEST, format!("expected a string from field: {}", field).into()))
-                }
-            }
-        }
-    }
-    if values.len() == 0 {
-        return Err(Error::Custom(StatusCode::BAD_REQUEST, "no data to update".into()))
-    }
-    let statement = format!("WITH updated AS (UPDATE users SET {} WHERE id = ${} RETURNING id) SELECT * FROM users_view WHERE id IN (SELECT id FROM updated);", updates.join(", "), number);
-    let mut query = query_as::<Postgres, User>(&statement);
-    for value in values {
-        query = query.bind(value);
-    }
-    query = query.bind(id);
-    let user = query.fetch_one(executor).await?;
+pub async fn create_user(executor: &Executor, mut user: User) -> Result<User> {
+    db::user::create_user(executor, &user).await?;
+    user.password = Default::default();
     Ok(user)
+}
+
+
+pub async fn get_user_by_id(executor: &Executor, id: &Id) -> Result<User> {
+    Ok(db::user::get_user_by_id(executor, id).await?)
+}
+
+
+pub async fn delete_user_by_id(executor: &Executor, id: &Id) -> Result<()> {
+    Ok(db::user::delete_user_by_id(executor, id).await?)
+}
+
+/// update the `user_name`, `first_name` and `last_name` of a user with the given Id.
+pub async fn update_user_by_id(executor: &Executor, id: &Id, mut map: HashMap<String, Value>) -> Result<User> {
+    let fields = ["user_name", "first_name", "last_name"];
+    let mut new_map = HashMap::new();
+    for field in fields {
+        if let Some(value) = option_value(map.remove(field)) {
+            new_map.insert(field, value);
+        }
+    }
+    Ok(db::user::update_user_by_id(executor, id, &new_map).await?)
+}
+
+
+/// This function returns true if value is not Empty else it returns false.
+fn value_is_not_empty(value: &Value) -> bool {
+    match value {
+        Value::Null => false,
+        Value::Bool(_) => true,
+        Value::Number(number) => Number::from_u128(0).unwrap() != *number || Number::from_i128(0).unwrap() != *number || Number::from_f64(0.0).unwrap() != *number,
+        Value::String(value) => !value.is_empty(),
+        Value::Array(value) => value.len() != 0,
+        Value::Object(map) => map.len() != 0,
+    }
+}
+
+/// This function takes in a value of `Option<Value>` and returns `Option<Value>`
+/// this function returns `None` if the option is `None`
+/// If the option has value. It uses the `value_is_not_empty` function to check if the value is Empty.
+/// if the Value is empty it also returns `None` else it returns the Value.
+fn option_value(option: Option<Value>) -> Option<Value> {
+    match option {
+        None => None,
+        Some(value) => if value_is_not_empty(&value){Some(value)}else{None}
+    }
 }
