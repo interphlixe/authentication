@@ -42,7 +42,8 @@ async fn user_by_email_does_not_exist(executor: &Executor, email: &EmailAddress)
 
 /// This function gets a particular user by his id.
 pub async fn get_user_by_id(executor: &Executor, id: &Id) -> Result<User> {
-    let result = query_as("SELECT * FROM users_view WHERE id = $1").bind(id).fetch_one(executor).await;
+    let sql = &format!("SELECT {} FROM users WHERE id = $1", User::fields().join(", "));
+    let result = query_as(sql).bind(id).fetch_one(executor).await;
     match result {
         Ok(user) => Ok(user),
         Err(err) => {
@@ -75,7 +76,8 @@ pub async fn update_user_by_id<'a>(executor: &Executor, id: &Id, map: &HashMap<&
     if updates.len() == 0 {
         return  Err(Error::Custom(StatusCode::BAD_REQUEST, "No Data to Update. Please provide fields and values to be updated".into()));
     }
-    let statement = format!("WITH updated AS (UPDATE users SET {} WHERE id = ${} RETURNING id) SELECT * FROM users_view WHERE id IN (SELECT id FROM updated);", updates.join(", "), index);
+    // let statement = format!("WITH updated AS (UPDATE users SET {} WHERE id = ${} RETURNING id) SELECT * FROM users_view WHERE id IN (SELECT id FROM updated);", updates.join(", "), index);
+    let statement = format!("UPDATE users SET {} WHERE id = ${} RETURNING {}", updates.join(", "), index, User::fields().join(", "));
     let mut query = query_as::<Postgres, User>(&statement);
     for value in values {
         query = query.bind(value);

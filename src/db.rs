@@ -54,20 +54,6 @@ DO $$
 "#;
 
 
-const CREATE_VIEW_TABLE_STATEMENT: &'static str = r#"
-DO $$
- BEGIN
-     IF NOT EXISTS (SELECT 1 FROM pg_views WHERE viewname =
- 'users_view') THEN
-         EXECUTE 'CREATE VIEW users_view AS
-                  SELECT id, email, user_name, first_name, last_name,
- created_at, profile_picture
-                  FROM users';
-     END IF;
- END $$;
-"#;
-
-
 /// These are names of the env variable names they are not actual values.
 /// the values of these variables will be used as keys to extract values from ENV variables.
 const DATABASE_URL: &'static str = "DATABASE_URL";
@@ -119,7 +105,6 @@ pub async fn init() -> Result<Pool<Postgres>> {
                 Ok(pool) => {
                     // making sure that the users table is always created.
                     create_users_table(&pool).await?;
-                    create_users_view_table(&pool).await?;
                     Ok(pool)
                 },
                 Err(err) => Err(err.into())
@@ -204,9 +189,3 @@ pub async fn create_users_index(pool: &Pool<Postgres>) -> Result<()> {
     query(sql).execute(pool).await?;
     Ok(())
 }
-
-
-pub async fn create_users_view_table(executor: &Pool<Postgres>) -> Result<()> {
-    query(CREATE_VIEW_TABLE_STATEMENT).execute(executor).await?;
-    Ok(())
-}   
