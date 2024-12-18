@@ -1,6 +1,7 @@
+use lettre::{message::Mailbox, transport::smtp::PoolConfig, AsyncSmtpTransport, Tokio1Executor};
 use serde::{Serialize, Deserialize};
 use std::error::Error as StdError;
-use lettre::{message::Mailbox, transport::smtp::PoolConfig, AsyncSmtpTransport, Tokio1Executor};
+use std::env::var;
 use super::*;
 
 
@@ -28,5 +29,22 @@ impl Mail {
             mailer = mailer.credentials(credentials.into())
         }
         Ok(mailer.pool_config(PoolConfig::new()).build())
+    }
+
+
+    pub fn from_env() -> Result<Self> {
+        let url = var("MAIL_URL").map_err(|_|"Set the MAIL_URL env variable.")?;
+        let sender = var("MAIL_SENDER").map_err(|_|"Set the MAIL_SENDER env variable.")?;
+        let sender = match serde_json::from_str(&sender) {
+            Ok(sender) => sender,
+            Err(_) => Mailbox::new(None, sender.parse().map_err(|_|"invalid MAIL_SENDER address")?)
+        };
+        let mut credentials = None;
+        if let Ok(name) = var("MAIL_NAME") {
+            if let Ok(password) = var("MAIL_PASSWORD") {
+                credentials = Some(Credentials{name, password});
+            }
+        }
+        Ok(Self{credentials, url, sender})
     }
 }
