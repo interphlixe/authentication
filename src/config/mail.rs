@@ -22,10 +22,10 @@ pub struct Mail {
 
 
 impl Mail {
-    pub fn mailer(self) -> Result<Mailer> {
+    pub fn mailer(&self) -> Result<Mailer> {
         let mut mailer = Mailer::from_url(&self.url)?;
-        if let Some(credentials) = self.credentials {
-            mailer = mailer.credentials(credentials)
+        if let Some(credentials) = &self.credentials {
+            mailer = mailer.credentials(credentials.into())
         }
         Ok(mailer.pool_config(PoolConfig::new()).build())
     }

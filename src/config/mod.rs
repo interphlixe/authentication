@@ -1,4 +1,5 @@
+mod credentials;
 mod mail;
 
-pub use lettre::transport::smtp::authentication::Credentials;
+pub use credentials::*;
 pub use mail::*;
