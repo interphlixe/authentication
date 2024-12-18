@@ -27,7 +27,7 @@ pub async fn create_user(executor: &Executor, user: &User) -> Result<()> {
 async fn user_by_email_does_not_exist(executor: &Executor, email: &EmailAddress) -> Result<()> {
     use EmailAddress::*;
     let email = match email{New(address)=>address.to_string(), Verified(address)=>address.to_string()};
-    let result = query!(r#"SELECT id FROM users WHERE email->>'email' = $1;"#, email).fetch_one(executor).await;
+    let result = query(r#"SELECT id FROM users WHERE email->>'email' = $1;"#).bind(email).fetch_one(executor).await;
     match result {
         Ok(record) => Err(Error::UserWithEmailExists),
         Err(err) => {
@@ -58,7 +58,7 @@ pub async fn get_user_by_id(executor: &Executor, id: &Id) -> Result<User> {
 
 /// This function deletes a user by id.
 pub async fn delete_user_by_id(executor: &Executor, id: &Id) -> Result<()> {
-    query!("DELETE FROM users WHERE id = $1;", &id.bytes()).execute(executor).await?;
+    query("DELETE FROM users WHERE id = $1;").bind(id).execute(executor).await?;
     Ok(())
 }
 
