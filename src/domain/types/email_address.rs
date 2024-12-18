@@ -28,8 +28,8 @@ impl<'q> Encode<'q, Postgres> for EmailAddress {
 
 impl<'r> Decode<'r, Postgres> for EmailAddress {
     fn decode(value: PgValueRef<'r>) -> Result<Self, sqlx::error::BoxDynError> {
-        let json = <Json<EmailAddress> as Decode<Postgres>>::decode(value)?.0;
-        Ok(json)
+        let email_address = <Json<EmailAddress> as Decode<Postgres>>::decode(value)?.0;
+        Ok(email_address)
     }
 }
 
