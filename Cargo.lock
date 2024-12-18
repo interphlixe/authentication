@@ -1292,6 +1292,7 @@ dependencies = [
  "nom",
  "percent-encoding",
  "quoted_printable",
+ "serde",
  "socket2",
  "tokio",
  "tokio-native-tls",
