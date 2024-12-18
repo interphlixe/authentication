@@ -2,8 +2,8 @@ use actix_web::{HttpServer, App, Responder, web, get, post, error::{InternalErro
 use lettre::{AsyncSmtpTransport, Tokio1Executor};
 use sqlx::{Pool, Postgres};
 use static_init::dynamic;
-use super::{init, Error};
 use serde_json::json;
+use super::Error;
 use user::*;
 
 mod user;
@@ -18,8 +18,9 @@ static PORT: u16 = read_port("PORT").unwrap_or(8080);
 
 ///Start a new Http server.
 pub async fn start() -> super::Result<()> {
-    let db = init().await?;
-    let mailer = crate::mail::mailer();
+    let config = crate::config::Config::read().await?;
+    let db = config.database.init().await?;
+    let mailer = config.mail.mailer()?;
     let data = web::Data::new((db, mailer));
     let json_config = web::JsonConfig::default().error_handler(json_error_handler);
     HttpServer::new(move|| {
