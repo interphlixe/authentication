@@ -109,6 +109,23 @@ impl<'a, N: Number + 'static + Encode<'a, Postgres> + Serialize + Default + Part
             None
         }
     }
+
+    fn array_postgres_type(&self) -> Option<<Postgres as sqlx::Database>::TypeInfo> {
+        let array = match self {
+            Self::Array(arr) => Some(arr),
+            _ => None,
+        }?;
+        let mut type_option = None;
+        for item in array {
+            if let Some(typ) = item.produces() {
+                match type_option {
+                    None => type_option = Some(typ),
+                    Some(ref type_id) => if typ != *type_id {return None}
+                }
+            }
+        }
+        type_option
+    }
 }
 
 
@@ -117,7 +134,7 @@ impl<'a, N: Number + 'static + Encode<'a, Postgres> + Serialize + Default + Part
         match self {
             Value::None => Ok(IsNull::Yes),
             Value::Bool(b) => <bool as Encode<Postgres>>::encode_by_ref(b, buf),
-            Value::Number(n) => n.encode_by_ref(buf),
+            Value::Number(n) => <N as Number>::encode_by_ref(n, buf),
             Value::String(s) => <String as Encode<Postgres>>::encode_by_ref(s, buf),
             Value::Array(array) => {
                 Value::encode_array(array, buf)
@@ -135,7 +152,7 @@ impl<'a, N: Number + 'static + Encode<'a, Postgres> + Serialize + Default + Part
             Self::Bool(bool) => Some(<bool as Type<Postgres>>::type_info()),
             Self::Number(_) => Some(<i64 as Type<Postgres>>::type_info()),
             Self::String(_) => Some(<String as Type<Postgres>>::type_info()),
-            Self::Array(value) => None,//Some(PgTypeInfo::with_name(&format!("{}[]", value.produces().unwrap_or(<Value as Type<Postgres>>::type_info())))),
+            Self::Array(value) => self.array_postgres_type(),
             Self::Map(_) => Some(<Value as Type<Postgres>>::type_info())
         }
     }

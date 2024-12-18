@@ -81,7 +81,6 @@ pub async fn update_user_by_id<'a>(executor: &Executor, id: &Id, map: &HashMap<&
         query = query.bind(value);
     }
     query = query.bind(id);
-    println!("{}", query.sql());
     let user = query.fetch_one(executor).await?;
     Ok(user)
 }
