@@ -7,23 +7,25 @@
      <style>
          body {
              font-family: Arial, sans-serif;
-             background-color: #e9e7e2;
+             background-color: #f5f5dc;
              margin: 0;
              padding: 0;
+             color: #ffffff;
+             text-decoration: none;
          }
          .container {
              max-width: 600px;
              margin: 20px auto;
-             background-color: #ffffff;
+             background-color: #1e1e1e;
              padding: 20px;
              border-radius: 8px;
-             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-             border-top: 5px solid #00796b;
+             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+             border-top: 5px solid #1db954;
          }
          .header {
              text-align: center;
              padding: 10px 0;
-             background-color: #00796b;
+             background-color: #1db954;
              color: #ffffff;
              border-radius: 8px 8px 0 0;
          }
@@ -35,14 +37,14 @@
              text-align: center;
          }
          .content p {
-             color: #555555;
+             color: #cccccc;
              line-height: 1.5;
          }
          .button {
              display: inline-block;
              margin-top: 20px;
              padding: 10px 20px;
-             background-color: #00796b;
+             background-color: #1db954;
              color: #ffffff;
              text-decoration: none;
              border-radius: 5px;
@@ -50,7 +52,7 @@
          .footer {
              text-align: center;
              margin-top: 20px;
-             color: #999999;
+             color: #777777;
              font-size: 12px;
          }
      </style>
@@ -63,10 +65,10 @@
          <div class="content">
              <p>Thank you for signing up! Please verify your email addres
  by clicking the button below or using the verification code provided.</p>
-             <a href="{{verification_link}}" class="button">Verify
+             <a href="{{magic_link}}" class="button" style="color: #ffffff; text-decoration: none;">Verify
  Email</a>
              <p>Or use this verification code:
- <strong>{{verification_code}}</strong></p>
+ <strong>{{code}}</strong></p>
          </div>
          <div class="footer">
              <p>If you did not sign up for this account, you can ignore
