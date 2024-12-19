@@ -3,6 +3,7 @@ use serde::{Serialize, Deserialize};
 use std::error::Error as StdError;
 use std::env::var;
 use crate::Mailer;
+use url::Url;
 use super::*;
 
 
@@ -24,7 +25,8 @@ pub struct Mail {
 
 impl Mail {
     pub fn mailer(&self) -> Result<Mailer> {
-        let mut mailer = Mailer::from_url(&self.url)?;
+        let connection_url = &self.url()?;
+        let mut mailer = Mailer::from_url(connection_url)?;
         if let Some(credentials) = &self.credentials {
             mailer = mailer.credentials(credentials.into())
         }
@@ -46,5 +48,18 @@ impl Mail {
             }
         }
         Ok(Self{credentials, url, sender})
+    }
+
+    fn url(&self) -> Result<String> {
+        let mut url = Url::parse(&self.url)?;
+        if let Some(credentials) = &self.credentials {
+            if url.username().is_empty() {
+                url.set_username(&credentials.name);
+            }
+            if url.password().is_none() {
+                url.set_password(Some(&credentials.password));
+            }
+        }
+        Ok(url.as_str().to_string())
     }
 }
