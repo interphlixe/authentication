@@ -11,3 +11,6 @@ pub use value::*;
 pub use error::*;
 pub use user::*;
 pub use id::*;
+
+
+pub type Mailer = lettre::AsyncSmtpTransport<lettre::Tokio1Executor>;

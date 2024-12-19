@@ -1,12 +1,6 @@
-use lettre::{
-    message::{header::ContentType, Mailbox}, transport::smtp::authentication::Credentials,
-    AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor,
-    transport::smtp::PoolConfig
-};
+use lettre::{Message, message::Mailbox, AsyncTransport};
 use std::env::var;
-
-
-type Mailer = AsyncSmtpTransport<Tokio1Executor>;
+use crate::Mailer;
 
 
 pub async fn send_mail(mailer: Mailer, sender: Mailbox, receiver: Mailbox, subject: &str, message: String) -> Result<(), Box<dyn std::error::Error>> {

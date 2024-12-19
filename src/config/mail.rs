@@ -1,12 +1,12 @@
-use lettre::{message::Mailbox, transport::smtp::PoolConfig, AsyncSmtpTransport, Tokio1Executor};
+use lettre::{message::Mailbox, transport::smtp::PoolConfig};
 use serde::{Serialize, Deserialize};
 use std::error::Error as StdError;
 use std::env::var;
+use crate::Mailer;
 use super::*;
 
 
 type Result<T> = std::result::Result<T, Box<dyn StdError>>;
-type Mailer = AsyncSmtpTransport<Tokio1Executor>;
 
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

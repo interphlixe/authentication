@@ -1,5 +1,4 @@
 use actix_web::{HttpServer, App, Responder, web, get, post, error::{InternalError, JsonPayloadError}, HttpRequest, HttpResponse, Error as ActixError};
-use lettre::{AsyncSmtpTransport, Tokio1Executor};
 use sqlx::{Pool, Postgres};
 use static_init::dynamic;
 use serde_json::json;
@@ -9,7 +8,6 @@ use user::*;
 mod user;
 
 
-type Mailer = AsyncSmtpTransport<Tokio1Executor>;
 type Result<T> = std::result::Result<T, Error>;
 type Db = Pool<Postgres>;
 
