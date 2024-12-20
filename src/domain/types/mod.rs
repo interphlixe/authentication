@@ -1,4 +1,5 @@
 mod email_address;
+mod verification;
 mod number;
 mod value;
 mod error;
@@ -6,6 +7,7 @@ mod user;
 mod id;
 
 pub use email_address::*;
+pub use verification::*;
 pub use number::*;
 pub use value::*;
 pub use error::*;
