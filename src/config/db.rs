@@ -28,6 +28,7 @@ impl Default for Database {
         let url = String::from("postgres://localhost:5432");
         Self {credentials, name, url}
     }
+
 }
 
 
@@ -73,6 +74,21 @@ CURRENT_TIMESTAMP
             END IF;
         END $$;
     "#;
+    const CREATE_VERIFICATION_CODES_TABLE_STATEMENT: &'static str = r#"
+        CREATE TABLE IF NOT EXISTS verification_codes (
+            id BYTEA PRIMARY KEY,
+            user_id BYTEA NOT NULL,
+            code TEXT NOT NULL,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+    "#;
+    const INDEX_USER_ID_CREATED_AT_STATEMENT: &'static str = r#"
+        CREATE INDEX IF NOT EXISTS user_id_and_created_at_index ON verification_codes (user_id, created_at DESC);
+    "#;
+    const INDEX_CREATED_AT_STATEMENT: &'static str = r#"
+        CREATE INDEX IF NOT EXISTS created_at_index ON verification_codes (created_at);
+    "#;
     const ERROR_CODE_DB_DOES_NOT_EXIST: &'static str = "3D000";
     const ERROR_CODE_TABLE_EXISTS: &'static str = "42P07";
 
@@ -108,6 +124,7 @@ CURRENT_TIMESTAMP
                 match result {
                     Ok(pool) => {
                         self.create_users_table(&pool).await?;
+                        self.create_verification_codes_table(&pool).await?;
                         Ok(pool)
                     },
                     Err(err) => Err(err.into())
@@ -171,6 +188,24 @@ CURRENT_TIMESTAMP
     pub async fn create_users_index(&self, pool: &Pool<Postgres>) -> Result<()> {
         let sql = Self::EMAIL_INDEX_ON_USERS_TABLE_STATEMENT;
         query(sql).execute(pool).await?;
+        Ok(())
+    }
+
+
+    pub async fn create_verification_codes_table(&self, pool: &Pool<Postgres>) -> Result<()> {
+        let sql = Self::CREATE_VERIFICATION_CODES_TABLE_STATEMENT;
+        query(sql).execute(pool).await?;
+        self.create_verification_codes_indexes(pool).await?;
+        Ok(())
+    }
+
+    pub async fn create_verification_codes_indexes(&self, pool: &Pool<Postgres>) -> Result<()> {
+        let sql_user_id_created_at = Self::INDEX_USER_ID_CREATED_AT_STATEMENT;
+        query(sql_user_id_created_at).execute(pool).await?;
+        
+        let sql_created_at = Self::INDEX_CREATED_AT_STATEMENT;
+        query(sql_created_at).execute(pool).await?;
+        
         Ok(())
     }
 }
