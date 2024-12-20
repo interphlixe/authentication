@@ -76,7 +76,7 @@ CURRENT_TIMESTAMP
     "#;
     const CREATE_VERIFICATION_CODES_TABLE_STATEMENT: &'static str = r#"
         CREATE TABLE IF NOT EXISTS verification_codes (
-            id BYTEA PRIMARY KEY,
+            id UUID PRIMARY KEY,
             user_id BYTEA NOT NULL,
             code TEXT NOT NULL,
             created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
