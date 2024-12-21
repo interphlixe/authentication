@@ -53,6 +53,16 @@ impl Serialize for EmailAddress {
     }
 }
 
+
+impl From<EmailAddress> for Address {
+    fn from(email: EmailAddress) -> Self {
+        match email {
+            EmailAddress::New(address) => address,
+            EmailAddress::Verified(address) => address
+        }
+    }
+}
+
 struct EmailAddressVisitor;
 
 impl<'de> Visitor<'de> for EmailAddressVisitor {
