@@ -33,3 +33,35 @@ pub async fn get_verification_by_id(executor: &Executor, id: &Uuid) -> Result<Ve
         Err(err) => Err(Error::Custom(StatusCode::INTERNAL_SERVER_ERROR, "Internal Server error".into())),
     }
 }
+
+
+pub async fn get_latest_verification_by_user_id(executor: &Executor, user_id: &Id) -> Result<Verification> {
+    let sql = r#"
+        SELECT * FROM verification_codes
+        WHERE user_id = $1
+        ORDER BY created_at DESC
+        LIMIT 1;
+    "#;
+    let result = query_as::<_, Verification>(sql)
+        .bind(user_id)
+        .fetch_one(executor)
+        .await;
+
+    match result {
+        Ok(verification) => Ok(verification),
+        Err(sqlx::Error::RowNotFound) => Err(Error::Custom(StatusCode::NOT_FOUND, "No verification code found for the user".into())),
+        Err(err) => Err(Error::Custom(StatusCode::INTERNAL_SERVER_ERROR, "Internal Server error".into())),
+    }
+}
+
+
+
+pub async fn delete_verification_by_id(executor: &Executor, id: &Uuid) -> Result<()> {
+    let sql = "DELETE FROM verification_codes WHERE id = $1";
+    query(sql)
+        .bind(id)
+        .execute(executor)
+        .await?;
+
+    Ok(())
+}
