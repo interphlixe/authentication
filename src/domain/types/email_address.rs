@@ -7,7 +7,7 @@ use std::str::FromStr;
 use lettre::Address;
 use std::fmt;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum EmailAddress {
     New(Address),
     Verified(Address),
@@ -132,37 +132,37 @@ mod tests {
     use super::*;
     use serde_json;
 
-    #[test]
-    fn test_serialize_new() {
-        let email = EmailAddress::New("user@domain.com".parse::<Address>().unwrap());
+    fn test_serialize(email: EmailAddress, expected_json: &str) {
         let json = serde_json::to_string(&email).unwrap();
-        assert_eq!(json, r#"{"email":"user@domain.com","verified":false}"#);
+        assert_eq!(json, expected_json);
     }
 
-    #[test]
-    fn test_serialize_verified() {
-        let email = EmailAddress::Verified("user@domain.com".parse::<Address>().unwrap());
-        let json = serde_json::to_string(&email).unwrap();
-        assert_eq!(json, r#"{"email":"user@domain.com","verified":true}"#);
-    }
-
-    #[test]
-    fn test_deserialize_new() {
-        let json = r#"{"email":"user@domain.com","verified":false}"#;
+    fn test_deserialize(json: &str, expected_email: EmailAddress) {
         let email: EmailAddress = serde_json::from_str(json).unwrap();
-        match email {
-            EmailAddress::New(address) => assert_eq!(address.to_string(), "user@domain.com"),
-            _ => panic!("Expected EmailAddress::New"),
-        }
+        assert_eq!(email, expected_email);
     }
 
     #[test]
-    fn test_deserialize_verified() {
-        let json = r#"{"email":"user@domain.com","verified":true}"#;
-        let email: EmailAddress = serde_json::from_str(json).unwrap();
-        match email {
-            EmailAddress::Verified(address) => assert_eq!(address.to_string(), "user@domain.com"),
-            _ => panic!("Expected EmailAddress::Verified"),
-        }
+    fn test_email_address_serialization() {
+        test_serialize(
+            EmailAddress::New("user@domain.com".parse::<Address>().unwrap()),
+            r#"{"email":"user@domain.com","verified":false}"#,
+        );
+        test_serialize(
+            EmailAddress::Verified("user@domain.com".parse::<Address>().unwrap()),
+            r#"{"email":"user@domain.com","verified":true}"#,
+        );
+    }
+
+    #[test]
+    fn test_email_address_deserialization() {
+        test_deserialize(
+            r#"{"email":"user@domain.com","verified":false}"#,
+            EmailAddress::New("user@domain.com".parse::<Address>().unwrap()),
+        );
+        test_deserialize(
+            r#"{"email":"user@domain.com","verified":true}"#,
+            EmailAddress::Verified("user@domain.com".parse::<Address>().unwrap()),
+        );
     }
 }
