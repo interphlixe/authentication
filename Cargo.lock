@@ -300,6 +300,7 @@ dependencies = [
  "chrono",
  "jwt",
  "lettre",
+ "rand",
  "serde",
  "serde_json",
  "sqlx",
