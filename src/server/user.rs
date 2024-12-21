@@ -6,10 +6,14 @@ use crate::user;
 use super::*;
 
 #[post("/signup")]
-async fn signup(user: Json<User>, data: Data<(Db, Mailer)>) -> Result<impl Responder> {
+async fn signup(user: Json<User>, data: Data<(Db, Mailer)>, req: HttpRequest) -> Result<impl Responder> {
     let executor = &data.0;
     let user = user.into_inner();
-    let created_user = user::create_user(executor, user).await?;
+    let mailer = &data.1;
+    let mail_config = &crate::config::Config::read().await.map_err(|e| Error::Custom(StatusCode::INTERNAL_SERVER_ERROR, e.into()))?.mail;
+    let scheme = req.headers().get("X-Forwarded-Proto").and_then(|v| v.to_str().ok()).unwrap_or("http");
+    let host = req.headers().get("Host").and_then(|v| v.to_str().ok()).unwrap_or("localhost");
+    let created_user = user::signup(executor, user, mailer, mail_config, scheme, host).await?;
     Ok(HttpResponse::Created().json(created_user))
 }
 
