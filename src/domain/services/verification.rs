@@ -1,11 +1,10 @@
+use crate::domain::db::{verification::*, user::verify_user};
+use sqlx::{Postgres, types::Uuid};
 use crate::{Verification, Error};
-use sqlx::types::Uuid;
-use crate::domain::db;
-use sqlx::Postgres;
+use super::{Id, User};
 use chrono::Utc;
 use sqlx::Pool;
 use rand::Rng;
-use super::Id;
 
 type Executor = Pool<Postgres>;
 type Result<T> = std::result::Result<T, Error>;
@@ -18,6 +17,17 @@ pub async fn generate_verification_code(executor: &Executor, user_id: Id) -> Res
         code: code.clone(),
         created_at: Utc::now(),
     };
-    db::verification::create_verification_code(executor, &verification).await?;
+    create_verification_code(executor, &verification).await?;
     Ok(verification)
+}
+
+
+pub async fn verify_magic_link(executor: &Executor, verification_id: &Uuid) -> Result<User> {
+    // Retrieve the verification information by ID
+    let verification = get_verification_by_id(executor, verification_id).await?;
+
+    // Verify the user's email and return the updated user
+    let updated_user = verify_user(executor, &verification.user_id).await?;
+
+    Ok(updated_user)
 }

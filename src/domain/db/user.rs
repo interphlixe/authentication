@@ -77,7 +77,7 @@ pub async fn update_user_by_id<'a>(executor: &Executor, id: &Id, map: &HashMap<&
         return  Err(Error::Custom(StatusCode::BAD_REQUEST, "No Data to Update. Please provide fields and values to be updated".into()));
     }
     // let statement = format!("WITH updated AS (UPDATE users SET {} WHERE id = ${} RETURNING id) SELECT * FROM users_view WHERE id IN (SELECT id FROM updated);", updates.join(", "), index);
-    let statement = format!("UPDATE users SET {} WHERE id = ${} RETURNING {}", updates.join(", "), index, User::fields().join(", "));
+    let statement = format!("UPDATE users SET {} WHERE id = ${} RETURNING {};", updates.join(", "), index, User::fields().join(", "));
     let mut query = query_as::<Postgres, User>(&statement);
     for value in values {
         query = query.bind(value);
@@ -85,4 +85,18 @@ pub async fn update_user_by_id<'a>(executor: &Executor, id: &Id, map: &HashMap<&
     query = query.bind(id);
     let user = query.fetch_one(executor).await?;
     Ok(user)
+}
+
+
+pub async fn verify_user(executor: &Executor, user_id: &Id) -> Result<User> {
+    let sql = &format!("UPDATE users SET email = jsonb_set(email, '{{verified}}', 'true'::jsonb) WHERE id = $1 RETURNING {};", User::fields().join(", "));
+    let result = query_as(sql)
+        .bind(user_id)
+        .fetch_one(executor)
+        .await;
+    match result {
+        Ok(user) => Ok(user),
+        Err(sqlx::Error::RowNotFound) => Err(Error::Custom(StatusCode::NOT_FOUND, "the user you are trying to validate seems to be deleted".into())),
+        Err(err) => Err(Error::Custom(StatusCode::INTERNAL_SERVER_ERROR, "Internal Server error".into())),
+    }
 }

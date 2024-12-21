@@ -2,10 +2,12 @@ use actix_web::{HttpServer, App, Responder, web, get, post, error::{InternalErro
 use sqlx::{Pool, Postgres};
 use static_init::dynamic;
 use serde_json::json;
+use verification::verify_magic_link;
 use super::Error;
 use user::*;
 
 mod user;
+mod verification;
 
 
 type Result<T> = std::result::Result<T, Error>;
@@ -30,6 +32,7 @@ pub async fn start() -> super::Result<()> {
         .service(get_user)
         .service(delete_user)
         .service(update_user)
+        .service(verify_magic_link)
     })
     .bind(("127.0.0.1", *PORT))?
     .run()

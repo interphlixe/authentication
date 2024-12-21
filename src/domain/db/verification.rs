@@ -1,4 +1,4 @@
-use sqlx::{query, query_as, Pool, Postgres};
+use sqlx::{query, query_as, Pool, Postgres, types::Uuid};
 use crate::{Verification, Error};
 use actix_web::http::StatusCode;
 use super::Id;
@@ -20,8 +20,8 @@ pub async fn create_verification_code(executor: &Executor, verification: &Verifi
 }
 
 
-pub async fn get_verification_by_id(executor: &Executor, id: &Id) -> Result<Verification> {
-    let sql = "SELECT id, user_id, code, created_at FROM verification_codes WHERE id = $1";
+pub async fn get_verification_by_id(executor: &Executor, id: &Uuid) -> Result<Verification> {
+    let sql = "SELECT * FROM verification_codes WHERE id = $1";
     let result = query_as::<_, Verification>(sql)
         .bind(id)
         .fetch_one(executor)
@@ -30,6 +30,6 @@ pub async fn get_verification_by_id(executor: &Executor, id: &Id) -> Result<Veri
     match result {
         Ok(verification) => Ok(verification),
         Err(sqlx::Error::RowNotFound) => Err(Error::Custom(StatusCode::NOT_FOUND, "Verification code not found".into())),
-        Err(err) => Err(Error::Custom(StatusCode::INTERNAL_SERVER_ERROR, err.into())),
+        Err(err) => Err(Error::Custom(StatusCode::INTERNAL_SERVER_ERROR, "Internal Server error".into())),
     }
 }
