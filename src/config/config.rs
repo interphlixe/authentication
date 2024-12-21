@@ -12,7 +12,8 @@ type Result<T> = std::result::Result<T, Box<dyn StdError>>;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Config {
     pub mail: Mail,
-    pub database: Database
+    pub database: Database,
+    pub argon: Argon2Config
 }
 
 
@@ -24,7 +25,7 @@ impl Config {
             Err(err) => {
                 match err.kind() {
                     ErrorKind::NotFound => {
-                        let config = Config{mail: Mail::from_env()?, database: Default::default()};
+                        let config = Config{mail: Mail::from_env()?, database: Default::default(), argon: Default::default()};
                         config.write(&path).await?;
                         return Ok(config)
                     },

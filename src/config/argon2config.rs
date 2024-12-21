@@ -1,7 +1,8 @@
+use jwt::algorithm;
 use serde::{Serialize, Deserialize, Serializer, Deserializer};
 use serde::de::{self, Visitor};
 use std::fmt;
-use argon2::{self, Argon2, Algorithm, Version, ParamsBuilder};
+use argon2::{self, Argon2, Algorithm, Version, ParamsBuilder, Params};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Argon2Config {
@@ -112,6 +113,20 @@ impl Argon2Config {
         } else {
             Argon2::new(self.algorithm, self.version, params)
         }
+    }
+}
+
+
+impl Default for Argon2Config {
+    fn default() -> Self {
+        let memory_cost = Params::DEFAULT_M_COST;
+        let time_cost = Params::DEFAULT_T_COST;
+        let parallelism = Params::DEFAULT_P_COST;
+        let algorithm = Default::default();
+        let version = Default::default();
+        let pepper = Default::default();
+
+        Argon2Config{memory_cost, time_cost, parallelism, algorithm, version, pepper}
     }
 }
 
