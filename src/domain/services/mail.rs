@@ -3,7 +3,7 @@ use std::env::var;
 use crate::Mailer;
 
 
-pub async fn send_html_email(mailer: Mailer, sender: Mailbox, receiver: Mailbox, subject: &str, message: String) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn send_html_email(mailer: &Mailer, sender: Mailbox, receiver: Mailbox, subject: &str, message: String) -> Result<(), Box<dyn std::error::Error>> {
     let body = SinglePart::html(message);
     let email = Message::builder()
     .from(sender)
