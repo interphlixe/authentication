@@ -1,14 +1,14 @@
-use actix_web::http::StatusCode;
 use sqlx::{query, query_as, Error as SqlxError, Execute, FromRow, Pool, Postgres};
 use super::{db, EmailAddress, Error, Id, User, Value, Mailer, Verification};
-use std::collections::HashMap;
 use crate::domain::services::verification::generate_verification_code;
 use crate::domain::services::mail::send_html_email;
-use crate::config::Mail;
+use actix_web::http::StatusCode;
+use std::collections::HashMap;
 use lettre::message::Mailbox;
+use crate::config::Mail;
 
-type Executor = Pool<Postgres>;
 type Result<T> = std::result::Result<T, Error>;
+type Executor = Pool<Postgres>;
 
 
 pub async fn signup(executor: &Executor, mut user: User, mailer: &Mailer, mail_config: &Mail, scheme: &str, host: &str) -> Result<User> {

@@ -1,10 +1,10 @@
-use sqlx::Pool;
-use sqlx::Postgres;
 use crate::{Verification, Error};
-use crate::domain::db;
-use rand::Rng;
 use sqlx::types::Uuid;
+use crate::domain::db;
+use sqlx::Postgres;
 use chrono::Utc;
+use sqlx::Pool;
+use rand::Rng;
 use super::Id;
 
 type Executor = Pool<Postgres>;

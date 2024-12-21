@@ -1,5 +1,5 @@
-use actix_web::http::StatusCode;
 use sqlx::{query, query_as, Error as SqlxError, Execute, Pool, Postgres};
+use actix_web::http::StatusCode;
 use std::collections::HashMap;
 use super::Value;
 use super::*;

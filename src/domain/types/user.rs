@@ -1,6 +1,6 @@
+use chrono::{DateTime, offset::Utc, TimeZone};
 use serde::{Serialize, Deserialize};
 use sqlx::{Encode, Decode, FromRow};
-use chrono::{DateTime, offset::Utc, TimeZone};
 use super::{Id, EmailAddress};
 
 
