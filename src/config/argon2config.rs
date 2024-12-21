@@ -1,8 +1,13 @@
-use jwt::algorithm;
+use argon2::{self, Argon2, Algorithm, Version, ParamsBuilder, Params};
 use serde::{Serialize, Deserialize, Serializer, Deserializer};
 use serde::de::{self, Visitor};
+use tokio::sync::OnceCell;
+use jwt::algorithm;
 use std::fmt;
-use argon2::{self, Argon2, Algorithm, Version, ParamsBuilder, Params};
+
+
+static PEPPER: OnceCell<String> = OnceCell::const_new();
+
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Argon2Config {
@@ -101,17 +106,30 @@ where
 }
 
 impl Argon2Config {
-    pub fn initialize_argon2<'a>(&'a self) -> Argon2<'a> {
+    pub async fn initialize_argon2(&self) -> Argon2<'static> {
         let params = ParamsBuilder::new()
             .m_cost(self.memory_cost)
             .t_cost(self.time_cost)
             .p_cost(self.parallelism)
             .build()
             .unwrap();
-        if let Some(pepper) = &self.pepper {
+        let closure = ||async {
+            match &self.pepper {
+                Some(pepper) => Ok(pepper.clone()),
+                None => Err(())
+            }
+        };
+        if let Ok(pepper) = PEPPER.get_or_try_init(closure).await {
             Argon2::new_with_secret(pepper.as_bytes(), self.algorithm, self.version, params).unwrap()
         } else {
             Argon2::new(self.algorithm, self.version, params)
+        }
+    }
+
+    async fn pepper(&self) -> Result<String, ()> {
+        match &self.pepper {
+            Some(pepper) => Ok(pepper.clone()),
+            None => Err(())
         }
     }
 }

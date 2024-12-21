@@ -21,7 +21,8 @@ pub async fn start() -> super::Result<()> {
     let config = crate::config::Config::read().await?;
     let db = config.database.init().await?;
     let mailer = config.mail.mailer()?;
-    let data = web::Data::new((db, mailer));
+    let argon2 = config.argon.initialize_argon2().await;
+    let data = web::Data::new((db, mailer, argon2));
     let json_config = web::JsonConfig::default().error_handler(json_error_handler);
     HttpServer::new(move|| {
         App::new()

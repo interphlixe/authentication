@@ -2,11 +2,12 @@ use actix_web::{http::StatusCode, web::{Data, Json, Path}, HttpResponse, delete,
 use crate::{User, Value, Mailer};
 use std::collections::HashMap;
 use serde_json::json;
+use argon2::Argon2;
 use crate::user;
 use super::*;
 
 #[post("/signup")]
-async fn signup(user: Json<User>, data: Data<(Db, Mailer)>, req: HttpRequest) -> Result<impl Responder> {
+async fn signup(user: Json<User>, data: Data<(Db, Mailer, Argon2<'_>)>, req: HttpRequest) -> Result<impl Responder> {
     let executor = &data.0;
     let user = user.into_inner();
     let mailer = &data.1;
@@ -19,7 +20,7 @@ async fn signup(user: Json<User>, data: Data<(Db, Mailer)>, req: HttpRequest) ->
 
 
 #[get("/users/{id}")]
-async fn get_user(id: Path<String>, data: Data<(Db, Mailer)>) -> Result<impl Responder> {
+async fn get_user(id: Path<String>, data: Data<(Db, Mailer, Argon2<'_>)>) -> Result<impl Responder> {
     let id = id.into_inner();
     let id = id.as_str().parse().map_err(|_|{Error::Custom(StatusCode::BAD_REQUEST, "invalid id".into())})?;
     let executor = &data.0;
@@ -29,7 +30,7 @@ async fn get_user(id: Path<String>, data: Data<(Db, Mailer)>) -> Result<impl Res
 
 
 #[delete("/users/{id}")]
-async fn delete_user(id: Path<String>, data: Data<(Db, Mailer)>) -> Result<impl Responder> {
+async fn delete_user(id: Path<String>, data: Data<(Db, Mailer, Argon2<'_>)>) -> Result<impl Responder> {
     let id = id.into_inner();
     let id = id.as_str().parse().map_err(|_|{Error::Custom(StatusCode::BAD_REQUEST, "invalid id".into())})?;
     let executor = &data.0;
@@ -39,7 +40,7 @@ async fn delete_user(id: Path<String>, data: Data<(Db, Mailer)>) -> Result<impl 
 
 
 #[put("/users/{id}")]
-async fn update_user(id: Path<String>, data: Data<(Db, Mailer)>, map: Json<HashMap<String, Value>>) -> Result<impl Responder> {
+async fn update_user(id: Path<String>, data: Data<(Db, Mailer, Argon2<'_>)>, map: Json<HashMap<String, Value>>) -> Result<impl Responder> {
     let id = id.into_inner();
     let id = id.as_str().parse().map_err(|_|{Error::Custom(StatusCode::BAD_REQUEST, "invalid id".into())})?;
     let executor = &data.0;
